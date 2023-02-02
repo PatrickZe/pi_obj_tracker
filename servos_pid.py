@@ -97,8 +97,10 @@ class Tracker_Servos():
 		#
 		#                         positive dx,dy
 		########################################
-		pid_dc_offset = self._pid.get_new_duty_cycle_offset(delta)
-		self._set_dc_values(self._current_dc + pid_dc_offset)
+		if abs(delta) >20:
+
+			pid_dc_offset = self._pid.get_new_duty_cycle_offset(delta)
+			self._set_dc_values(self._current_dc + pid_dc_offset)
 
 		
 	def set_dc_boundary(self, servo_lower: int, servo_upper: int)->None:

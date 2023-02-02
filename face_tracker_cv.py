@@ -5,11 +5,13 @@ from picamera2 import MappedArray, Picamera2, Preview
 from libcamera import Transform
 from servos_pid import Tracker_Servos
 
+
 face_detector = cv2.CascadeClassifier("/home/patrick/dep/opencv/haarcascade_frontalface_default.xml")
 face_x = 0
 face_y = 0
 pixel_delta_x = 0
 pixel_delta_y = 0
+
 
 def draw_faces(request):
 	with MappedArray(request, "main") as m:
@@ -18,6 +20,7 @@ def draw_faces(request):
 			cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0, 0))
 			get_pixel_delta_from_mid(x+0.5*w, y+0.5*h)
             
+
 def get_pixel_delta_from_mid(pixel_x: int, pixel_y: int):
 	global pixel_delta_x, pixel_delta_y
 	size_x = 640
@@ -62,7 +65,7 @@ while True:
 	buffer = picam2.capture_buffer("lores")
 	grey = buffer[:s1 * h1].reshape((h1, s1))
 	faces = face_detector.detectMultiScale(grey, 1.1, 3)
-	if True:#time.time()-start_time > 0.01:
+	if True:#time.time()-start_time > 0.2:
 		#print(f"Face at x={pixel_delta_x}, y={pixel_delta_y}")
 		#print(faces)
 		mech_rotation.set_pixel_delta(pixel_delta_x)

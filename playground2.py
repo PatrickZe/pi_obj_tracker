@@ -1,44 +1,77 @@
+
+import sys
 import time
-import cv2
-from picamera2 import MappedArray, Picamera2, Preview
 
-face_detector = cv2.CascadeClassifier("/home/patrick/dep/opencv/haarcascade_frontalface_default.xml")
-face_x = 0
-face_y = 0
-
-def draw_faces(request):
-	with MappedArray(request, "main") as m:
-		for f in faces:
-			(x, y, w, h) = [c * n // d for c, n, d in zip(f, (w0, h0) * 2, (w1, h1) * 2)]
-			cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0, 0))
-			global face_x, face_y
-			face_x = int(x + 0.5*w)
-			face_y = int(y + 0.5*h)
-            
+from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread,
+                          QThreadPool, pyqtSignal)
 
 
-#Setup camera
-picam2 = Picamera2()
-picam2.start_preview(Preview.QT)
-config = picam2.create_preview_configuration(main={"size": (640, 480)},
-                                             lores={"size": (320, 240), "format": "YUV420"})
-picam2.configure(config)
+# Subclassing QThread
+# http://qt-project.org/doc/latest/qthread.html
+class AThread(QThread):
 
-(w0, h0) = picam2.stream_configuration("main")["size"]
-(w1, h1) = picam2.stream_configuration("lores")["size"]
-s1 = picam2.stream_configuration("lores")["stride"]
+    def run(self):
+        count = 0
+        while count < 5:
+            time.sleep(1)
+            print("A Increasing")
+            count += 1
 
-faces = []
-picam2.post_callback = draw_faces
+# Subclassing QObject and using moveToThread
+# http://blog.qt.digia.com/blog/2007/07/05/qthreads-no-longer-abstract
+class SomeObject(QObject):
 
-picam2.start()
+    finished = pyqtSignal()
 
-start_time = time.time()
-while True:
-	buffer = picam2.capture_buffer("lores")
-	grey = buffer[:s1 * h1].reshape((h1, s1))
-	faces = face_detector.detectMultiScale(grey, 1.1, 3)
-	if time.time()-start_time > 3:
-		print(f"Face at x={face_x}, y={face_y}")
-		start_time = time.time()
+    def long_running(self):
+        count = 0
+        while count < 5:
+            time.sleep(1)
+            print("B Increasing")
+            count += 1
+        self.finished.emit()
 
+# Using a QRunnable
+# http://qt-project.org/doc/latest/qthreadpool.html
+# Note that a QRunnable isn't a subclass of QObject and therefore does
+# not provide signals and slots.
+class Runnable(QRunnable):
+
+    def run(self):
+        count = 0
+        app = QCoreApplication.instance()
+        while count < 5:
+            print("C Increasing")
+            time.sleep(1)
+            count += 1
+        app.quit()
+
+
+def using_q_thread():
+    app = QCoreApplication([])
+    thread = AThread()
+    thread.finished.connect(app.exit)
+    thread.start()
+    sys.exit(app.exec_())
+
+def using_move_to_thread():
+    app = QCoreApplication([])
+    objThread = QThread()
+    obj = SomeObject()
+    obj.moveToThread(objThread)
+    obj.finished.connect(objThread.quit)
+    objThread.started.connect(obj.long_running)
+    objThread.finished.connect(app.exit)
+    objThread.start()
+    sys.exit(app.exec_())
+
+def using_q_runnable():
+    app = QCoreApplication([])
+    runnable = Runnable()
+    QThreadPool.globalInstance().start(runnable)
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    using_q_thread()
+    #using_move_to_thread()
+    #using_q_runnable()
