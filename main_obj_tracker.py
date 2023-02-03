@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #cam.start_preview(Preview.QT)
 
     qtcam = QGlPicamera2(cam, width=640, height=480, keep_ar=False)
-    print("helosa")
+    
 
  
     gallery = MainGUI(cam=qtcam)
@@ -47,5 +47,5 @@ if __name__ == "__main__":
 
     #gui_main_fun()
 
-    print("Hello wordl2")
+    
     
