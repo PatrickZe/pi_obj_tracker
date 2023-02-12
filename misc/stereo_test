@@ -1,0 +1,79 @@
+
+from PyQt5.QtCore import *#QDateTime, Qt, QTimer, pyqtSlot
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *#(QApplication, QImage,
+        #QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QRadioButton, QVBoxLayout, QWidget, QButtonGroup)
+
+import sys
+import logging
+import cv2
+from picamera2 import *#Picamera2, Preview, MappedArray
+from picamera2.previews.qt import QGlPicamera2
+from libcamera import Transform
+#import picamera2.array
+import time
+
+import RPi.GPIO as gpio
+
+
+
+class CamThread(QThread):
+    def __init__(self, parent=None, name="") -> None:
+        super(CamThread, self).__init__(parent)
+        self.name = name
+        
+        self.picam2 = Picamera2()
+        #picam2.start_preview(Preview.QT)
+        self.picam2.start()
+        self.picam2.close()
+    def run(self):
+        print(f"Capturing {self.name}")
+        self.picam2.start_and_capture_file(f"{self.name}.jpg")
+        self.picam2.close()
+        print("Capturing finished")
+        #pass
+
+
+class MainWindow(QDialog):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
+
+        layout = QGridLayout()
+        label = QLabel("HALLO")
+        layout.addWidget(label, 0,0)
+
+        self.setLayout(layout)
+        self.setWindowTitle("Test")
+
+        self.current_cam = 0
+        gpio.setmode(gpio.BCM)
+        gpio.setup(3, gpio.OUT)
+        gpio.output(3, 0)
+        print("Set cam1")
+        cam1 = CamThread(self, "cam1")
+        gpio.output(3, 1)
+        time.sleep(1)
+        print("set cam2")
+        cam2 = CamThread(self, "cam2")
+        time.sleep(1)
+        start_time = time.time()
+        gpio.output(3, 0)
+        cam1.start()
+        time.sleep(0.2)
+        gpio.output(3,1)
+        cam2.start()
+        print(f"Time: {time.time()-start_time}")
+
+
+
+    #def set_cam(self):
+    #    if self.current_cam == 0:
+
+
+
+
+if __name__=="__main__":
+    app = QApplication([])
+    window = MainWindow()
+    window.show()
+    app.exec_()
