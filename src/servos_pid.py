@@ -8,8 +8,8 @@ class PID():
 	def __init__(self):
 		self.mode = "P"
 		self.Kp = 0.001 #should be <<1
-		self.Ki = 0.0005
-		self.Kd = 0.00001
+		self.Ki = 0.00005
+		self.Kd = 0
 
 		#previous
 		self.prev_error = 0
