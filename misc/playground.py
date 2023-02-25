@@ -27,6 +27,7 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 
 from picamera2 import MappedArray, Picamera2, Preview
+from libcamera import Transform
 
 normalSize = (640, 480)
 lowresSize = (320, 240)
@@ -115,26 +116,30 @@ def InferenceTensorFlow(image, model, output, label=None):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model', help='Path of the detection model.', required=True)
-    parser.add_argument('--label', help='Path of the labels file.')
-    parser.add_argument('--output', help='File path of the output image.')
-    args = parser.parse_args()
-
-    if (args.output):
-        output_file = args.output
-    else:
-        output_file = 'out.jpg'
-
-    if (args.label):
-        label_file = args.label
-    else:
-        label_file = None
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument('--model', help='Path of the detection model.', required=True)
+    #parser.add_argument('--label', help='Path of the labels file.')
+    #parser.add_argument('--output', help='File path of the output image.')
+    #args = parser.parse_args()
+#
+    #if (args.output):
+    #    output_file = args.output
+    #else:
+    #    output_file = 'out.jpg'
+#
+    #if (args.label):
+    #    label_file = args.label
+    #else:
+    #    label_file = None
+    label_file = "tf_labels.txt"
+    model = "mobilenet_v2.tflite"
+    output_file = "out.jpg"
 
     picam2 = Picamera2()
     picam2.start_preview(Preview.QT)
     config = picam2.create_preview_configuration(main={"size": normalSize},
-                                                 lores={"size": lowresSize, "format": "YUV420"})
+                                                 lores={"size": lowresSize, "format": "YUV420"},
+                                                 transform=Transform(vflip=1))
     picam2.configure(config)
 
     stride = picam2.stream_configuration("lores")["stride"]
@@ -145,7 +150,7 @@ def main():
     while True:
         buffer = picam2.capture_buffer("lores")
         grey = buffer[:stride * lowresSize[1]].reshape((lowresSize[1], stride))
-        _ = InferenceTensorFlow(grey, args.model, output_file, label_file)
+        _ = InferenceTensorFlow(grey, model, output_file, label_file)
 
 
 if __name__ == '__main__':
