@@ -1,3 +1,14 @@
+#############################################
+# Raspberry Pi based Object Tracker
+# DHBW Embedded Systems project
+# Author: Patrick Zeitlmayr
+#
+# File: aktor_qt.py
+#
+#
+#
+#############################################
+
 import time
 from PyQt5.QtCore import QThread
 

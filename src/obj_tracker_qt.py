@@ -14,17 +14,12 @@
 #############################################
 
 #QT
-from PyQt5.QtCore import *#QDateTime, Qt, QTimer, pyqtSlot
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *#(QApplication, QImage,
-        #QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QRadioButton, QVBoxLayout, QWidget, QButtonGroup)
-
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import (QDialog, QLabel, QHBoxLayout, QGridLayout, QGroupBox, 
+                             QRadioButton, QSlider, QButtonGroup, QVBoxLayout)
 #MISC
-import sys
 import logging
-import time
-import numpy as np
-from pathlib import Path
 
 #Own
 from aktor_qt import AktorThread
@@ -40,9 +35,6 @@ class MainGUI(QDialog):
         self.controll_mode = "Manual" #Manual or Automatic
         self.algo_mode = "Raw"  #Used algorithm for tracking, raw == none
 
- 
-
-        #self.originalPalette = QApplication.palette()
 
         self.image = QPixmap()
         self.image_label = QLabel()

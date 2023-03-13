@@ -33,7 +33,7 @@ class VideoThread(QThread):
         self.tilt_mechanic = tilt
         self.rotation_mechanic = rotation
         #Setup Opencv
-        self.face_detector_cv = cv2.CascadeClassifier("/home/patrick/dep/opencv/haarcascade_frontalface_default.xml")
+        self.face_detector_cv = cv2.CascadeClassifier("/home/patrick/Projects/pi_obj_tracker/src/haarcascade_frontalface_default.xml")
         
         #setup picamera
         self.picam2 = Picamera2()
